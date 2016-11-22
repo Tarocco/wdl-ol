@@ -27,6 +27,9 @@ ipch/
 build-*
 /IPlugExamples/*/*.vcxproj.user
 
+/WDL/*/x64/
+/WDL/*/x86/
+
 PCH/*
 VST3_SDK/*
 VST_SDK/*
