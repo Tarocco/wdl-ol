@@ -354,7 +354,7 @@ void GenerateKnobGUI(IGraphics* pGraphics,
 {
   pGraphics->AttachPanelBackground(pBGColor);
   
-  const int w = pGraphics->Width();
+  const int w = pGraphics->Width(true);
   
   // Calculate max bounds
   WDL_String tmpText;
@@ -559,7 +559,7 @@ void GenerateSliderGUI(IGraphics* pGraphics,
       pControl->Hide(true);
     }
     
-    if (yoffs + paramNameMaxBounds.H() >= pGraphics->Height() - 5) 
+    if (yoffs + paramNameMaxBounds.H() >= pGraphics->Height(true) - 5) 
     {
       col++;
       yoffs = 2;
