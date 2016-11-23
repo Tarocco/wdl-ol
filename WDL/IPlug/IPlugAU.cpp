@@ -589,24 +589,26 @@ ComponentResult IPlugAU::GetProperty(AudioUnitPropertyID propID, AudioUnitScope 
         memset(pInfo, 0, sizeof(AudioUnitParameterInfo));
         pInfo->flags = kAudioUnitParameterFlag_CFNameRelease |
                        kAudioUnitParameterFlag_HasCFNameString |
-                       kAudioUnitParameterFlag_IsReadable;
+                       kAudioUnitParameterFlag_IsReadable |
+                       kAudioUnitParameterFlag_IsWritable |
+                       kAudioUnitParameterFlag_IsHighResolution;
         
         IParam* pParam = GetParam(element);
         
         double shape = pParam->GetShape();
           
         if (shape > 2.5)
-            pInfo->flags |= kAudioUnitParameterFlag_DisplayCubeRoot;
+          pInfo->flags |= kAudioUnitParameterFlag_DisplayCubeRoot;
         else if (shape > 1.5)
-            pInfo->flags |= kAudioUnitParameterFlag_DisplaySquareRoot;
+          pInfo->flags |= kAudioUnitParameterFlag_DisplaySquareRoot;
         else if (shape < (2.0 / 5.0))
-            pInfo->flags |= kAudioUnitParameterFlag_DisplayCubed;
+          pInfo->flags |= kAudioUnitParameterFlag_DisplayCubed;
         else if (shape < (2.0 / 3.0))
-            pInfo->flags |= kAudioUnitParameterFlag_DisplaySquared;
-                      
-        if (pParam->GetCanAutomate()) 
+          pInfo->flags |= kAudioUnitParameterFlag_DisplaySquared;
+          
+        if (!pParam->GetCanAutomate())
         {
-          pInfo->flags |= kAudioUnitParameterFlag_IsWritable;
+          pInfo->flags |= kAudioUnitParameterFlag_NonRealTime;
         }
         
         if (pParam->GetIsMeta()) 
@@ -614,6 +616,9 @@ ComponentResult IPlugAU::GetProperty(AudioUnitPropertyID propID, AudioUnitScope 
           pInfo->flags |= kAudioUnitParameterFlag_IsElementMeta;
         }
         
+        if (pParam->GetNDisplayTexts())
+          pInfo->flags |= kAudioUnitParameterFlag_ValuesHaveStrings;
+          
         const char* paramName = pParam->GetNameForHost();
         pInfo->cfNameString = MakeCFString(pParam->GetNameForHost());
         strcpy(pInfo->name, paramName);   // Max 52.
@@ -876,7 +881,11 @@ ComponentResult IPlugAU::GetProperty(AudioUnitPropertyID propID, AudioUnitScope 
       *pDataSize = sizeof(CFArrayRef);
       if (pData)
       {
+#ifdef AU_PRESET_LIST
         int i, n = NPresets();
+#else
+        int i, n = 0;
+#endif
         CFMutableArrayRef presetArray = CFArrayCreateMutable(kCFAllocatorDefault, n, &kCFAUPresetArrayCallBacks);
 
         if (presetArray == NULL)
@@ -1055,11 +1064,10 @@ ComponentResult IPlugAU::GetProperty(AudioUnitPropertyID propID, AudioUnitScope 
         {
           CStrLocal cStr(pVFS->inString);
           IParam* pParam = GetParam(pVFS->inParamID);
-          if (pParam->GetNDisplayTexts())
+          int v = 0;
+          if (pParam->GetNDisplayTexts() && (pParam->MapDisplayText(cStr.mCStr, &v) || pParam->Type() == IParam::kTypeEnum))
           {
-            int v;
-            if (pParam->MapDisplayText(cStr.mCStr, &v))
-              pVFS->outValue = (AudioUnitParameterValue) v;
+            pVFS->outValue = (AudioUnitParameterValue) v;
           }
           else
           {

@@ -38,7 +38,6 @@ public:
       flags |= ParameterInfo::kCanAutomate;
     }
       
-      // FIX - check
     if (pParam->Type() == IParam::kTypeEnum)
     {
       flags |= ParameterInfo::kIsList;
@@ -50,14 +49,14 @@ public:
     info.unitId = unitID;
   }
   
-  virtual void toString (ParamValue valueNormalized, String128 string) const
+  virtual void toString(ParamValue valueNormalized, String128 string) const
   {
     char disp[MAX_PARAM_DISPLAY_LEN];
     mIPlugParam->GetDisplayForHost(valueNormalized, true, disp);
     Steinberg::UString(string, 128).fromAscii(disp);
   }
   
-  virtual bool fromString (const TChar* string, ParamValue& valueNormalized) const
+  virtual bool fromString(const TChar* string, ParamValue& valueNormalized) const
   {
     String str ((TChar*)string);
     valueNormalized = mIPlugParam->GetNormalized(atof(str.text8()));
@@ -65,12 +64,12 @@ public:
     return true;
   }
   
-  virtual Steinberg::Vst::ParamValue toPlain (ParamValue valueNormalized) const
+  virtual Steinberg::Vst::ParamValue toPlain(ParamValue valueNormalized) const
   {
     return mIPlugParam->GetNonNormalized(valueNormalized);
   }
   
-  virtual Steinberg::Vst::ParamValue toNormalized (ParamValue plainValue) const
+  virtual Steinberg::Vst::ParamValue toNormalized(ParamValue plainValue) const
   {
     return mIPlugParam->GetNormalized(valueNormalized);
   }
@@ -413,9 +412,12 @@ tresult PLUGIN_API IPlugVST3::process(ProcessData& data)
             default:
               if (idx >= 0 && idx < NParams())
               {
+                double currentValue = GetParam(idx)->GetNormalized();
+                int32 size = data.symbolicSampleSize;
+           
                 // Filter repeat values
                 
-                if (GetParam(idx)->GetNormalized() != value)
+                if ((currentValue != value) && !(size == kSample32 && ((float) currentValue) == value))
                 {
                     GetParam(idx)->SetNormalized(value);
                     if (GetGUI()) GetGUI()->SetParameterFromPlug(idx, value, true);
@@ -777,22 +779,12 @@ tresult PLUGIN_API IPlugVST3::setParamNormalized(ParamID tag, ParamValue value)
 
 tresult PLUGIN_API IPlugVST3::getParamStringByValue(ParamID tag, ParamValue valueNormalized, String128 string)
 {
-  IParam* param = GetParam(tag);
-
-  if (param)
-  {
-    char disp[MAX_PARAM_NAME_LEN];
-    param->GetDisplayForHost(valueNormalized, true, disp);
-    Steinberg::UString(string, 128).fromAscii(disp);
-    return kResultTrue;
-  }
-
-  return kResultFalse;
+  return SingleComponentEffect::getParamStringByValue(tag, valueNormalized, string);  
 }
 
-tresult PLUGIN_API IPlugVST3::getParamValueByString (ParamID tag, TChar* string, ParamValue& valueNormalized)
+tresult PLUGIN_API IPlugVST3::getParamValueByString(ParamID tag, TChar* string, ParamValue& valueNormalized)
 {
-  return SingleComponentEffect::getParamValueByString (tag, string, valueNormalized);
+  return SingleComponentEffect::getParamValueByString(tag, string, valueNormalized);
 }
 
 void IPlugVST3::addDependentView(IPlugVST3View* view)
@@ -833,13 +825,13 @@ tresult IPlugVST3::endEdit(ParamID tag)
   return kResultFalse;
 }
 
-AudioBus* IPlugVST3::getAudioInput (int32 index)
+AudioBus* IPlugVST3::getAudioInput(int32 index)
 {
   AudioBus* bus = FCast<AudioBus> (audioInputs.at(index));
   return bus;
 }
 
-AudioBus* IPlugVST3::getAudioOutput (int32 index)
+AudioBus* IPlugVST3::getAudioOutput(int32 index)
 {
   AudioBus* bus = FCast<AudioBus> (audioOutputs.at(index));
   return bus;
