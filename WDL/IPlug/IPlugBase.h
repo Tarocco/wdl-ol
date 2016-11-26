@@ -126,7 +126,9 @@ public:
   // Useful stuff for your plugin class or an outsider to call,
   // most of which is implemented by the API class.
 
-  double GetSampleRate() { return mSampleRate; }
+  // <edit>
+  virtual double GetSampleRate() { return mSampleRate; }
+  // </edit>
   int GetBlockSize() { return mBlockSize; }
   int GetLatency() { return mLatency; }
 
@@ -280,7 +282,9 @@ public:
   bool LoadProgramFromFXP(WDL_String* fileName);
   bool LoadBankFromFXB(WDL_String* fileName);
   
-  void SetSampleRate(double sampleRate);
+  // <edit>
+  virtual void SetSampleRate(double sampleRate) { mSampleRate = sampleRate; }
+  // </edit>
   virtual void SetBlockSize(int blockSize); // overridden in IPlugAU
   
   WDL_Mutex mMutex;

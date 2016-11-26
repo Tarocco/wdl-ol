@@ -297,10 +297,11 @@ double IPlugBase::GetSamplesPerBeat()
   return 0.0;
 }
 
-void IPlugBase::SetSampleRate(double sampleRate)
-{
-  mSampleRate = sampleRate;
-}
+/*virtual*/
+//void IPlugBase::SetSampleRate(double sampleRate)
+//{
+//  mSampleRate = sampleRate;
+//}
 
 void IPlugBase::SetBlockSize(int blockSize)
 {
