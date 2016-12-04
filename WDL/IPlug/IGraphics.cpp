@@ -474,6 +474,17 @@ bool IGraphics::DrawBitmap(IBitmap* pIBitmap, IRECT* pDest, int srcX, int srcY, 
   return true;
 }
 
+// TODO: LICE_TransformBlit
+bool IGraphics::DrawScaledBitmap(IBitmap* pIBitmap, IRECT* pDest, int srcX, int srcY, const IChannelBlend* pBlend)
+{
+	LICE_IBitmap* pLB = (LICE_IBitmap*)pIBitmap->mData;
+	IRECT r = pDest->Intersect(&mDrawRECT);
+	srcX += r.L - pDest->L;
+	srcY += r.T - pDest->T;
+	_LICE::LICE_ScaledBlit(mDrawBitmap, pLB, r.L, r.T, pDest->W(), pDest->H(), srcX, srcY, r.W(), r.H(), LiceWeight(pBlend), LiceBlendMode(pBlend) | LICE_BLIT_FILTER_BILINEAR);
+	return true;
+}
+
 bool IGraphics::DrawRotatedBitmap(IBitmap* pIBitmap, int destCtrX, int destCtrY, double angle, int yOffsetZeroDeg,
                                   const IChannelBlend* pBlend)
 {
