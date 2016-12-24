@@ -285,8 +285,17 @@ tresult PLUGIN_API IPlugVST3::setBusArrangements(SpeakerArrangement* inputs, int
   SetInputChannelConnections(0, NInChannels(), false);
   SetOutputChannelConnections(0, NOutChannels(), false);
 
-  int32 reqNumInputChannels = SpeakerArr::getChannelCount(inputs[0]);  //requested # input channels
-  int32 reqNumOutputChannels = SpeakerArr::getChannelCount(outputs[0]);//requested # output channels
+  int32 reqNumInputChannels, reqNumOutputChannels;
+
+  if (numIns > 0)
+    reqNumInputChannels = SpeakerArr::getChannelCount(inputs[0]);  //requested # input channels
+  else
+    reqNumInputChannels = 0;
+
+  if(numOuts > 0)
+    reqNumOutputChannels = SpeakerArr::getChannelCount(outputs[0]);//requested # output channels
+  else
+    reqNumOutputChannels = 0;
 
   // legal io doesn't consider sidechain inputs
   if (!LegalIO(reqNumInputChannels, reqNumOutputChannels))
@@ -854,6 +863,10 @@ SpeakerArrangement IPlugVST3::getSpeakerArrForChans(int32 chans)
       return SpeakerArr::k50;
     case 6:
       return SpeakerArr::k51;
+    case 7: // HACK
+        return SpeakerArr::k70Music;
+    case 8: // HACK
+        return SpeakerArr::k71Music;
     default:
       return SpeakerArr::kEmpty;
       break;

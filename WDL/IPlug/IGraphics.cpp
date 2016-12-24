@@ -4,7 +4,7 @@
 
 // If not dirty for this many timer ticks, we call OnGUIIDle.
 // Only looked at if USE_IDLE_CALLS is defined.
-#define IDLE_TICKS 20
+#define IDLE_TICKS 1
 
 #ifndef CONTROL_BOUNDS_COLOR
   #define CONTROL_BOUNDS_COLOR COLOR_GREEN
@@ -346,6 +346,26 @@ void IGraphics::SetParameterFromPlug(int paramIdx, double value, bool normalized
   }
 }
 
+void IGraphics::SetParameterDefaultFromPlug(int paramIdx, double value, bool normalized)
+{
+    if (!normalized)
+    {
+        IParam* pParam = mPlug->GetParam(paramIdx);
+        value = pParam->GetNormalized(value);
+    }
+    int i, n = mControls.GetSize();
+    IControl** ppControl = mControls.GetList();
+    for (i = 0; i < n; ++i, ++ppControl)
+    {
+        IControl* pControl = *ppControl;
+        if (pControl->ParamIdx() == paramIdx)
+        {
+            pControl->SetDefaultValueFromPlug(value);
+            // Could be more than one, don't break until we check them all.
+        }
+    }
+}
+
 void IGraphics::SetControlFromPlug(int controlIdx, double normalizedValue)
 {
   if (controlIdx >= 0 && controlIdx < mControls.GetSize())
@@ -354,6 +374,16 @@ void IGraphics::SetControlFromPlug(int controlIdx, double normalizedValue)
     mControls.Get(controlIdx)->SetValueFromPlug(normalizedValue);
   }
 }
+
+void IGraphics::SetControlDefaultFromPlug(int controlIdx, double normalizedValue)
+{
+  if (controlIdx >= 0 && controlIdx < mControls.GetSize())
+  {
+      //WDL_MutexLock lock(&mMutex);
+      mControls.Get(controlIdx)->SetDefaultValueFromPlug(normalizedValue);
+  }
+}
+
 
 void IGraphics::SetAllControlsDirty()
 {
@@ -923,10 +953,13 @@ void IGraphics::OnMouseUp(int x, int y, IMouseMod* pMod)
     IControl* pControl = mControls.Get(c);
     pControl->OnMouseUp(x, y, pMod);
     pControl = mControls.Get(c); // needed if the mouse message caused a resize/rebuild
-    int paramIdx = pControl->ParamIdx();
-    if (paramIdx >= 0)
+    if (pControl) // Make sure the control is still there
     {
-      mPlug->EndInformHostOfParamChange(paramIdx);
+        int paramIdx = pControl->ParamIdx();
+        if (paramIdx >= 0)
+        {
+            mPlug->EndInformHostOfParamChange(paramIdx);
+        }
     }
   }
   ReleaseMouseCapture();
@@ -934,7 +967,7 @@ void IGraphics::OnMouseUp(int x, int y, IMouseMod* pMod)
 
 bool IGraphics::OnMouseOver(int x, int y, IMouseMod* pMod)
 {
-  if (mHandleMouseOver)
+  if (mHandleMouseOver)    
   {
     int c = GetMouseControlIdx(x, y, true);
     if (c >= 0)
@@ -1115,6 +1148,7 @@ int IGraphics::GetLastClickedParamForPTAutomation()
 
 void IGraphics::OnGUIIdle()
 {
+  mPlug->OnGUIIdle();
   int i, n = mControls.GetSize();
   IControl** ppControl = mControls.GetList();
   for (i = 0; i < n; ++i, ++ppControl)

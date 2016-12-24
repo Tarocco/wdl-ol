@@ -12,7 +12,7 @@
 #include "NChanDelay.h"
 
 // Uncomment to enable IPlug::OnIdle() and IGraphics::OnGUIIdle().
-// #define USE_IDLE_CALLS
+#define USE_IDLE_CALLS
 
 #define MAX_EFFECT_NAME_LEN 128
 #define DEFAULT_BLOCK_SIZE 1024
@@ -68,6 +68,7 @@ public:
   // IGraphics::OnGUIIdle which is called from the GUI thread.
   // Only active if USE_IDLE_CALLS is defined.
   virtual void OnIdle() {}
+  virtual void OnGUIIdle() {}
 
   // Not usually needed ... Reset is called on activate regardless of whether this is implemented.
   // Also different hosts have different interpretations of "activate".
@@ -126,9 +127,7 @@ public:
   // Useful stuff for your plugin class or an outsider to call,
   // most of which is implemented by the API class.
 
-  // <edit>
   virtual double GetSampleRate() { return mSampleRate; }
-  // </edit>
   int GetBlockSize() { return mBlockSize; }
   int GetLatency() { return mLatency; }
 
@@ -282,9 +281,7 @@ public:
   bool LoadProgramFromFXP(WDL_String* fileName);
   bool LoadBankFromFXB(WDL_String* fileName);
   
-  // <edit>
   virtual void SetSampleRate(double sampleRate) { mSampleRate = sampleRate; }
-  // </edit>
   virtual void SetBlockSize(int blockSize); // overridden in IPlugAU
   
   WDL_Mutex mMutex;

@@ -231,7 +231,11 @@ void IPlugBase::AttachGraphics(IGraphics* pGraphics)
     
     for (i = 0; i < n; ++i)
     {
-      pGraphics->SetParameterFromPlug(i, GetParam(i)->GetNormalized(), true);
+      IParam* param = GetParam(i);
+      double value = param->GetNormalized();
+      double default_value = param->GetDefaultNormalized();
+      pGraphics->SetParameterDefaultFromPlug(i, default_value, true);
+      pGraphics->SetParameterFromPlug(i, value, true);
     }
     
     pGraphics->PrepDraw();
@@ -956,8 +960,11 @@ void IPlugBase::RedrawParamControls()
     int i, n = mParams.GetSize();
     for (i = 0; i < n; ++i)
     {
-      double v = mParams.Get(i)->Value();
-      mGraphics->SetParameterFromPlug(i, v, false);
+      IParam* param = mParams.Get(i);
+      double value = param->Value();
+      double default_value = param->GetDefault();
+      mGraphics->SetParameterDefaultFromPlug(i, default_value, false);
+      mGraphics->SetParameterFromPlug(i, value, false);
     }
   }
 }

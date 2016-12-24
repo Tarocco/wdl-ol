@@ -6,17 +6,22 @@ const float GRAYED_ALPHA = 0.25f;
 
 void IControl::SetValueFromPlug(double value)
 {
-  if (mDefaultValue < 0.0)
-  {
-    mDefaultValue = mValue = value;
-  }
-
   if (mValue != value)
   {
     mValue = value;
     SetDirty(false);
   }
 }
+
+void IControl::SetDefaultValueFromPlug(double value)
+{
+    if (mDefaultValue != value)
+    {
+        mDefaultValue = value;
+        SetDirty(false);
+    }
+}
+
 
 void IControl::SetValueFromUserInput(double value)
 {
