@@ -29,6 +29,7 @@ build-*
 
 /WDL/*/x64/
 /WDL/*/x86/
+/WDL/*/Win32/
 
 PCH/*
 VST3_SDK/*
