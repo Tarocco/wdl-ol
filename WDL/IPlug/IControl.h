@@ -99,6 +99,7 @@ public:
   // IPlugBase::OnIdle which is called from the audio processing thread.
   // Only active if USE_IDLE_CALLS is defined.
   virtual void OnGUIIdle() {}
+  virtual void OnGUIDrawn() {}
   
   // a struct that contain a parameter index and normalized value
   struct AuxParam 
